@@ -1,0 +1,2499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tilaye Merera Dinka — Systems Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+:root {
+  --bg-deep: #0B0F19;
+  --bg-card: #111827;
+  --bg-card-hover: #1F2937;
+  --primary: #F59E0B;
+  --primary-dim: #D97706;
+  --primary-glow: #FBBF24;
+  --text: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --accent-blue: #3B82F6;
+  --accent-green: #10B981;
+  --accent-red: #EF4444;
+  --accent-purple: #8B5CF6;
+  --border: #1E293B;
+  --border-light: #334155;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--bg-deep);
+}
+
+/* ========== LOADING SCREEN ========== */
+#loader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg-deep);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s;
+}
+#loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.loader-circuit {
+  width: 120px; height: 120px;
+  position: relative;
+}
+
+.loader-circuit svg {
+  width: 100%; height: 100%;
+}
+
+.loader-circuit circle {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: circuitDraw 2s ease forwards;
+}
+
+.loader-circuit .node {
+  fill: var(--primary);
+  opacity: 0;
+  animation: nodePulse 0.5s ease forwards;
+}
+
+.loader-circuit .node:nth-child(2) { animation-delay: 0.3s; }
+.loader-circuit .node:nth-child(3) { animation-delay: 0.6s; }
+.loader-circuit .node:nth-child(4) { animation-delay: 0.9s; }
+
+@keyframes circuitDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes nodePulse {
+  0% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.loader-text {
+  margin-top: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 3px;
+}
+
+.loader-progress {
+  width: 200px; height: 2px;
+  background: var(--border);
+  margin-top: 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loader-progress-bar {
+  width: 0%; height: 100%;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+/* ========== NAVIGATION ========== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 20px 60px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(11, 15, 25, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s, padding 0.3s;
+}
+
+nav.scrolled {
+  border-bottom-color: var(--border);
+  padding: 14px 60px;
+}
+
+.nav-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 2px;
+}
+
+.nav-logo span { color: var(--text); }
+
+.nav-links {
+  display: flex; gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  letter-spacing: 1px;
+  position: relative;
+  transition: color 0.3s;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 2px;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover { color: var(--text); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-eu-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg-deep);
+  background: var(--primary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ========== HERO SECTION ========== */
+#hero {
+  position: relative;
+  height: 100vh;
+  display: flex; align-items: center;
+  overflow: hidden;
+}
+
+#hero-canvas {
+  position: absolute; inset: 0;
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative; z-index: 10;
+  padding: 0 60px;
+  max-width: 900px;
+}
+
+.hero-name {
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -2px;
+  margin-bottom: 8px;
+}
+
+.hero-name .line1 {
+  display: block;
+  background: linear-gradient(135deg, #fff 0%, #e2e8f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-name .line2 {
+  display: block;
+  color: var(--primary);
+}
+
+.hero-tagline {
+  font-size: clamp(16px, 2.5vw, 22px);
+  color: var(--text-secondary);
+  margin-top: 24px;
+  font-style: italic;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.cursor-blink {
+  display: inline-block;
+  width: 3px; height: 24px;
+  background: var(--primary);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+.hero-roles {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-top: 32px;
+}
+
+.role-pill {
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border: 1.5px solid;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.role-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.role-pill.blue { color: var(--accent-blue); border-color: var(--accent-blue); background: rgba(59,130,246,0.08); }
+.role-pill.green { color: var(--accent-green); border-color: var(--accent-green); background: rgba(16,185,129,0.08); }
+.role-pill.red { color: var(--accent-red); border-color: var(--accent-red); background: rgba(239,68,68,0.08); }
+
+.hero-scroll {
+  position: absolute; bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; z-index: 10;
+}
+
+.hero-scroll span {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 3px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, var(--primary), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.5); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+/* ========== SECTIONS COMMON ========== */
+section {
+  padding: 100px 60px;
+  position: relative;
+}
+
+.section-header {
+  margin-bottom: 60px;
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.section-label::before {
+  content: '';
+  display: block;
+  width: 40px; height: 2px;
+  background: var(--primary);
+}
+
+.section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.section-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  max-width: 600px;
+}
+
+/* ========== STORY SECTION ========== */
+#story {
+  background: linear-gradient(180deg, var(--bg-deep) 0%, #0f172a 100%);
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+}
+
+.story-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s ease, border-color 0.4s;
+}
+
+.story-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+}
+
+.story-card.insa::before { background: var(--accent-blue); }
+.story-card.wing::before { background: var(--accent-green); }
+
+.story-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-light);
+}
+
+.story-card-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+
+.story-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+
+.story-card.insa .story-icon { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+.story-card.wing .story-icon { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+
+.story-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.story-card .period {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.story-card ul {
+  list-style: none;
+  margin-top: 20px;
+}
+
+.story-card li {
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 10px;
+}
+
+.story-card li:last-child { border-bottom: none; }
+
+.story-card li::before {
+  content: '>';
+  color: var(--primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.story-synthesis {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.02) 100%);
+  border: 1px solid rgba(245,158,11,0.3);
+  text-align: center;
+  padding: 50px;
+}
+
+.story-synthesis h3 {
+  font-size: 18px;
+  color: var(--primary);
+  margin-bottom: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 2px;
+}
+
+.story-synthesis p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+/* ========== PROJECTS SECTION ========== */
+#projects {
+  background: var(--bg-deep);
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+}
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-light);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.project-header {
+  padding: 24px 24px 0;
+  display: flex; gap: 8px;
+}
+
+.project-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.badge-deployed { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+.badge-production { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+.badge-completed { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+.badge-dev { background: rgba(245,158,11,0.15); color: var(--primary); }
+
+.project-card h3 {
+  padding: 16px 24px 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.project-tech {
+  padding: 0 24px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.project-desc {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.project-results {
+  padding: 16px 24px;
+  background: rgba(245,158,11,0.05);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ========== GAME 1: COMMISSION THE CONTROLLER ========== */
+#game1 {
+  background: linear-gradient(180deg, #0f172a 0%, var(--bg-deep) 100%);
+  padding: 80px 60px;
+}
+
+.game-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.game-header {
+  padding: 24px 32px;
+  background: linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(239,68,68,0.02) 100%);
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.game-header h3 {
+  font-size: 18px;
+  color: var(--accent-red);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.game-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.game-score span { color: var(--primary); font-weight: 700; }
+
+#controller-canvas {
+  width: 100%; height: 500px;
+  background: var(--bg-deep);
+  cursor: crosshair;
+}
+
+.game-instructions {
+  padding: 16px 32px;
+  background: var(--bg-card-hover);
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex; gap: 24px; align-items: center;
+}
+
+.game-instructions strong { color: var(--text); }
+
+/* ========== GAME 2: NETWORK ARCHITECT ========== */
+#game2 {
+  background: var(--bg-deep);
+  padding: 80px 60px;
+}
+
+.game2-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.game2-header {
+  padding: 24px 32px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(59,130,246,0.02) 100%);
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.game2-header h3 {
+  font-size: 18px;
+  color: var(--accent-blue);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.game2-stats {
+  display: flex; gap: 24px;
+}
+
+.stat-box {
+  text-align: center;
+}
+
+.stat-box .label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.stat-box .value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+#network-canvas {
+  width: 100%; height: 500px;
+  background: var(--bg-deep);
+  cursor: grab;
+}
+
+#network-canvas:active { cursor: grabbing; }
+
+.game2-toolbar {
+  padding: 16px 32px;
+  background: var(--bg-card-hover);
+  border-top: 1px solid var(--border);
+  display: flex; gap: 12px; align-items: center;
+  flex-wrap: wrap;
+}
+
+.tool-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tool-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.tool-btn.active {
+  background: var(--primary);
+  color: var(--bg-deep);
+  border-color: var(--primary);
+}
+
+/* ========== SKILLS SECTION ========== */
+#skills {
+  background: linear-gradient(180deg, var(--bg-deep) 0%, #0f172a 100%);
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+}
+
+.skill-category {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.3s;
+}
+
+.skill-category:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+}
+
+.skill-category-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.skill-category-header .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+
+.skill-category-header h4 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.skill-item {
+  margin-bottom: 14px;
+}
+
+.skill-item:last-child { margin-bottom: 0; }
+
+.skill-label {
+  display: flex; justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.skill-label .name { color: var(--text-secondary); }
+.skill-label .pct { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+.skill-bar-bg {
+  width: 100%; height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0%;
+  transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ========== WHY EU SECTION ========== */
+#whyeu {
+  background: var(--bg-deep);
+}
+
+.reasons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+}
+
+.reason-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.reason-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--primary);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.reason-card:hover::before { transform: scaleY(1); }
+
+.reason-card:hover {
+  border-color: var(--border-light);
+  transform: translateX(4px);
+}
+
+.reason-number {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--primary);
+  opacity: 0.3;
+  line-height: 1;
+  margin-bottom: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.reason-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.reason-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ========== TERMINAL CONTACT ========== */
+#contact {
+  background: linear-gradient(180deg, #0f172a 0%, var(--bg-deep) 100%);
+  padding: 100px 60px;
+}
+
+.terminal {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+}
+
+.terminal-header {
+  background: var(--bg-card-hover);
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal-btn {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+
+.terminal-btn.red { background: var(--accent-red); }
+.terminal-btn.yellow { background: var(--primary); }
+.terminal-btn.green { background: var(--accent-green); }
+
+.terminal-title {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.terminal-body {
+  padding: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.8;
+  min-height: 400px;
+  overflow-y: auto;
+}
+
+.terminal-line {
+  margin-bottom: 4px;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+
+.terminal-prompt {
+  color: var(--primary);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.terminal-output {
+  color: var(--text-secondary);
+}
+
+.terminal-output.success { color: var(--accent-green); }
+.terminal-output.error { color: var(--accent-red); }
+.terminal-output.info { color: var(--accent-blue); }
+
+.terminal-input-line {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px;
+}
+
+#terminal-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  flex: 1;
+  caret-color: var(--primary);
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 10px; height: 18px;
+  background: var(--primary);
+  animation: blink 1s step-end infinite;
+}
+
+/* ========== FOOTER ========== */
+footer {
+  padding: 40px 60px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+footer p {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  nav { padding: 14px 20px; }
+  nav.scrolled { padding: 10px 20px; }
+  .nav-links { display: none; }
+
+  section { padding: 60px 20px; }
+  .hero-content { padding: 0 20px; }
+
+  .story-grid { grid-template-columns: 1fr; }
+  .story-synthesis { grid-column: 1; }
+
+  .projects-grid { grid-template-columns: 1fr; }
+  .reasons-grid { grid-template-columns: 1fr; }
+  .skills-grid { grid-template-columns: 1fr; }
+
+  #controller-canvas, #network-canvas { height: 350px; }
+}
+
+/* ========== ANIMATIONS ========== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loader">
+  <div class="loader-circuit">
+    <svg viewBox="0 0 120 120">
+      <circle cx="60" cy="20" r="4" class="node"/>
+      <circle cx="100" cy="60" r="4" class="node"/>
+      <circle cx="60" cy="100" r="4" class="node"/>
+      <circle cx="20" cy="60" r="4" class="node"/>
+      <circle cx="60" cy="60" r="30" class="circuit-ring"/>
+      <line x1="60" y1="20" x2="100" y2="60" stroke="#F59E0B" stroke-width="1" opacity="0.3"/>
+      <line x1="100" y1="60" x2="60" y2="100" stroke="#F59E0B" stroke-width="1" opacity="0.3"/>
+      <line x1="60" y1="100" x2="20" y2="60" stroke="#F59E0B" stroke-width="1" opacity="0.3"/>
+      <line x1="20" y1="60" x2="60" y2="20" stroke="#F59E0B" stroke-width="1" opacity="0.3"/>
+    </svg>
+  </div>
+  <div class="loader-text">INITIALIZING SYSTEMS</div>
+  <div class="loader-progress">
+    <div class="loader-progress-bar" id="loader-bar"></div>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<nav id="navbar">
+  <div class="nav-logo">TILAYE<span>.</span>DEV</div>
+  <ul class="nav-links">
+    <li><a href="#story">STORY</a></li>
+    <li><a href="#projects">PROJECTS</a></li>
+    <li><a href="#game1">GAMES</a></li>
+    <li><a href="#skills">SKILLS</a></li>
+    <li><a href="#whyeu">WHY EU</a></li>
+    <li><a href="#contact">CONTACT</a></li>
+  </ul>
+  <div class="nav-eu-badge">EU READY</div>
+</nav>
+
+<!-- HERO SECTION -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <h1 class="hero-name">
+      <span class="line1">TILAYE</span>
+      <span class="line2">MERERA DINKA</span>
+    </h1>
+    <p class="hero-tagline">
+      I build the systems that run nations.
+      <span class="cursor-blink"></span>
+    </p>
+    <div class="hero-roles">
+      <span class="role-pill blue">Senior Full-Stack Engineer</span>
+      <span class="role-pill green">Industrial Automation Expert</span>
+      <span class="role-pill red">Security Infrastructure Specialist</span>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- STORY SECTION -->
+<section id="story">
+  <div class="section-header reveal">
+    <div class="section-label">01 / ORIGIN</div>
+    <h2 class="section-title">The Dual-Path Engineer</h2>
+    <p class="section-subtitle">Most engineers choose one path. I built two — simultaneously.</p>
+  </div>
+  <div class="story-grid">
+    <div class="story-card insa reveal">
+      <div class="story-card-header">
+        <div class="story-icon">&#9670;</div>
+        <div>
+          <h3>INSA</h3>
+          <div class="period">Government · Critical Infrastructure · 2018–Present</div>
+        </div>
+      </div>
+      <ul>
+        <li>Design & maintain electronic security systems for national infrastructure</li>
+        <li>Architect LAN/WAN networks, enterprise SAN/NAS, server infrastructure</li>
+        <li>Lead 1,000+ camera city-wide surveillance deployment</li>
+        <li>Conduct aviation security audits: 2,000+ cameras</li>
+        <li>Develop HLD/LLD documentation for critical projects</li>
+        <li>Manage petabyte-level storage (Dell EMC, NetApp, Huawei)</li>
+        <li>Cisco routing/switching, VLANs, network hardening</li>
+      </ul>
+    </div>
+    <div class="story-card wing reveal">
+      <div class="story-card-header">
+        <div class="story-icon">&#9670;</div>
+        <div>
+          <h3>Wing Life Trading PLC</h3>
+          <div class="period">Entrepreneurial · Commercial · 2021–Present</div>
+        </div>
+      </div>
+      <ul>
+        <li>Co-founded and technically lead engineering services firm</li>
+        <li>Design & deploy ESP32-based industrial IoT controllers</li>
+        <li>Maintain industrial laundry systems (Milnor, Primus, Lavamac)</li>
+        <li>Deliver fire detection/suppression for banking datacenters</li>
+        <li>Execute electrical installation & infrastructure projects</li>
+        <li>Develop custom IoT with remote monitoring & OTA updates</li>
+        <li>Drive startup growth to expanding services provider</li>
+      </ul>
+    </div>
+    <div class="story-synthesis reveal">
+      <h3>THE SYNTHESIS</h3>
+      <p>This dual-experience creates a unique engineering perspective: I bring the compliance rigor of government infrastructure to commercial innovation, and the agility of startup engineering to enterprise-scale deployments. For EU Industry 4.0 and smart infrastructure, this hybrid profile accelerates digital transformation.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS SECTION -->
+<section id="projects">
+  <div class="section-header reveal">
+    <div class="section-label">02 / WORK</div>
+    <h2 class="section-title">Project Showcase</h2>
+    <p class="section-subtitle">Selected works demonstrating end-to-end engineering capability</p>
+  </div>
+  <div class="projects-grid">
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-badge badge-deployed">DEPLOYED</span>
+        <span class="project-badge badge-deployed">10+ SITES</span>
+      </div>
+      <h3>Industrial Washing Machine Controller</h3>
+      <div class="project-tech">ESP32 · Modbus RTU · C++ · IoT · Triple-Layer Safety</div>
+      <div class="project-desc">Designed a complete ESP32-based replacement controller automating 6-stage washing cycles with triple-layer safety (watchdog + hardware + predictive), black-box fault logging, WiFi remote management, and OTA firmware updates.</div>
+      <div class="project-results">70% COST REDUCTION | SAME-DAY REPLACEMENT | REMOTE MONITORING ENABLED</div>
+    </div>
+        <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-badge badge-dev">PROTOTYPE</span>
+        <span class="project-badge badge-deployed">FIELD TESTED</span>
+      </div>
+      <h3>USV — Unmanned Surface Vehicle</h3>
+      <div class="project-tech">ESP32 · GPS · Sonar · Telemetry · C++ · Autonomous Navigation</div>
+      <div class="project-desc">Designed and built a fully autonomous unmanned surface vehicle for river and lake depth surveying. The USV navigates pre-planned waypoints, collects bathymetric data via sonar, and transmits real-time telemetry to a ground station. Eliminates manual boat surveying, reducing cost and risk while increasing coverage accuracy.</div>
+      <div class="project-results">AUTONOMOUS WAYPOINT NAVIGATION | REAL-TIME DEPTH MAPPING | 80% COST REDUCTION VS MANUAL SURVEY</div>
+    </div>
+<div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-badge badge-production">PRODUCTION-READY</span>
+      </div>
+      <h3>Modbus Ultimate Scanner v2.2</h3>
+      <div class="project-tech">Python · Flask · SSE · ESP32 · Auto-Discovery · 273+ Devices</div>
+      <div class="project-desc">Complete auto-discovery scanner detecting baud rate, parity, and slave ID automatically. Device fingerprinting against 273+ known manufacturer register maps using Jaccard similarity. Real-time dark-mode dashboard with live SSE updates.</div>
+      <div class="project-results">HOURS TO MINUTES COMMISSIONING | ZERO OPERATOR COMPLEXITY | PORTABLE PYTHON</div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-badge badge-completed">COMPLETED</span>
+        <span class="project-badge badge-completed">2,000+ CAMERAS</span>
+      </div>
+      <h3>Ethiopian Airlines Security Audit</h3>
+      <div class="project-tech">Aviation Security · ICAO/IATA · Vulnerability Assessment</div>
+      <div class="project-desc">Comprehensive security audit of Africa's largest airline surveillance infrastructure. Evaluated 2,000+ cameras across terminals, hangars, and cargo areas. Assessed network security, access control, and compliance with international aviation standards.</div>
+      <div class="project-results">STRENGTHENED AVIATION SECURITY | ICAO/IATA ALIGNED | MODERNIZATION ROADMAP</div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-badge badge-deployed">DEPLOYED</span>
+        <span class="project-badge badge-deployed">1,000+ CAMERAS</span>
+      </div>
+      <h3>Federal Police City-Wide Surveillance</h3>
+      <div class="project-tech">IP Surveillance · Cisco · Fiber · SOC · Petabyte Storage</div>
+      <div class="project-desc">Technical Manager for nationwide law enforcement network. Spearheaded deployment of 1,000+ IP cameras across Addis Ababa with fiber backbone, Cisco routing/switching, and centralized SOC with real-time crime monitoring.</div>
+      <div class="project-results">ENHANCED LAW ENFORCEMENT | REAL-TIME MONITORING | SCALABLE ARCHITECTURE</div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-badge badge-deployed">DEPLOYED</span>
+        <span class="project-badge badge-deployed">500+ CAMERAS</span>
+      </div>
+      <h3>Federal Prison Security Overhaul</h3>
+      <div class="project-tech">HD Surveillance · Intrusion Detection · Biometric Access</div>
+      <div class="project-desc">Designed comprehensive electronic security ecosystem for high-security federal prison. Integrated 500+ HD cameras with advanced IDS, biometric access control, and centralized jail management. Zero-compromise architecture.</div>
+      <div class="project-results">ZERO BLIND SPOTS | REAL-TIME AWARENESS | ZERO-COMPROMISE SECURITY</div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-header">
+        <span class="project-badge badge-deployed">DEPLOYED</span>
+        <span class="project-badge badge-deployed">4+ BANKS</span>
+      </div>
+      <h3>Banking Datacenter Fire Systems</h3>
+      <div class="project-tech">FM200 · Novec 1230 · VESDA · NFPA Standards</div>
+      <div class="project-desc">Designed and implemented fire detection and suppression systems for Commercial Bank of Ethiopia, Dashen Bank, Tsehay Bank, and Siinqee Bank datacenters. VESDA early warning with clean agent suppression.</div>
+      <div class="project-results">CRITICAL INFRASTRUCTURE PROTECTED | NFPA COMPLIANT | BUSINESS CONTINUITY</div>
+    </div>
+  </div>
+</section>
+
+<!-- GAME 1: COMMISSION THE CONTROLLER -->
+<section id="game1">
+  <div class="section-header reveal">
+    <div class="section-label">03 / INTERACTIVE</div>
+    <h2 class="section-title">Commission the Controller</h2>
+    <p class="section-subtitle">Drag components to the ESP32 board to build a working industrial controller. Connect all modules to boot the system.</p>
+  </div>
+  <div class="game-container reveal">
+    <div class="game-header">
+      <h3>> COMMISSION_THE_CONTROLLER.exe</h3>
+      <div class="game-score">SCORE: <span id="game1-score">0</span> | STATUS: <span id="game1-status">OFFLINE</span></div>
+    </div>
+    <canvas id="controller-canvas"></canvas>
+    <div class="game-instructions">
+      <strong>INSTRUCTIONS:</strong> Drag the components (Temperature Sensor, VFD Modbus, Relay Board, WiFi Module, Safety Watchdog) to their matching connection points on the ESP32. Connect all 5 to boot the system.
+    </div>
+  </div>
+</section>
+
+<!-- GAME 2: NETWORK ARCHITECT -->
+<section id="game2">
+  <div class="section-header reveal">
+    <div class="section-label">04 / INTERACTIVE</div>
+    <h2 class="section-title">Network Architect</h2>
+    <p class="section-subtitle">Build a city-wide surveillance network. Place routers, switches, and cameras to achieve full coverage with optimal latency.</p>
+  </div>
+  <div class="game2-container reveal">
+    <div class="game2-header">
+      <h3>> NETWORK_ARCHITECT.exe</h3>
+      <div class="game2-stats">
+        <div class="stat-box">
+          <div class="label">BUDGET</div>
+          <div class="value" id="budget">$50K</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">COVERAGE</div>
+          <div class="value" id="coverage">0%</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">LATENCY</div>
+          <div class="value" id="latency">--ms</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">SCORE</div>
+          <div class="value" id="game2-score">0</div>
+        </div>
+      </div>
+    </div>
+    <canvas id="network-canvas"></canvas>
+    <div class="game2-toolbar">
+      <button class="tool-btn active" data-tool="router" onclick="selectTool('router')">ROUTER ($5K)</button>
+      <button class="tool-btn" data-tool="switch" onclick="selectTool('switch')">SWITCH ($3K)</button>
+      <button class="tool-btn" data-tool="camera" onclick="selectTool('camera')">CAMERA ($1K)</button>
+      <button class="tool-btn" data-tool="storage" onclick="selectTool('storage')">STORAGE ($8K)</button>
+      <button class="tool-btn" style="margin-left:auto;" onclick="resetNetwork()">RESET</button>
+      <button class="tool-btn" onclick="checkNetwork()">VALIDATE</button>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS SECTION -->
+<section id="skills">
+  <div class="section-header reveal">
+    <div class="section-label">05 / CAPABILITIES</div>
+    <h2 class="section-title">Technical Skills</h2>
+    <p class="section-subtitle">Multidisciplinary expertise spanning hardware, software, networking, and security</p>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-category reveal">
+      <div class="skill-category-header">
+        <div class="dot" style="background:var(--accent-red)"></div>
+        <h4 style="color:var(--accent-red)">INDUSTRIAL AUTOMATION</h4>
+      </div>
+      <div class="skill-item"><div class="skill-label"><span class="name">PLC (Siemens, Wago, Beckhoff)</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-red)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Modbus RTU/TCP</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-red)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">ESP32/Embedded C++</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-red)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Embedded C / C++</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-red)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">VFD Control</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-red)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">HMI/SCADA (WinCC)</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-red)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">PCB Design (Proteus)</span><span class="pct">80%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="80" style="background:var(--accent-red)"></div></div></div>
+    </div>
+    <div class="skill-category reveal">
+      <div class="skill-category-header">
+        <div class="dot" style="background:var(--accent-blue)"></div>
+        <h4 style="color:var(--accent-blue)">SECURITY & INFRASTRUCTURE</h4>
+      </div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Enterprise CCTV (IP/Analog)</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-blue)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Cisco Routing & Switching</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-blue)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">SAN/NAS (Dell EMC, NetApp)</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-blue)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Network Security</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-blue)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Fire Safety (FM200, NFPA)</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-blue)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Access Control & IDS</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-blue)"></div></div></div>
+    </div>
+    <div class="skill-category reveal">
+      <div class="skill-category-header">
+        <div class="dot" style="background:var(--accent-green)"></div>
+        <h4 style="color:var(--accent-green)">SOFTWARE ENGINEERING</h4>
+      </div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Node.js / Express.js</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-green)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">MongoDB / Mongoose</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-green)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">RESTful API Design</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-green)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">C++ / Embedded</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-green)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">React.js</span><span class="pct">85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="85" style="background:var(--accent-green)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">JavaScript</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-green)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">MERN Stack</span><span class="pct">90%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="90" style="background:var(--accent-green)"></div></div></div>
+    </div>
+    <div class="skill-category reveal">
+      <div class="skill-category-header">
+        <div class="dot" style="background:var(--accent-purple)"></div>
+        <h4 style="color:var(--accent-purple)">PROJECT & SYSTEMS</h4>
+      </div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Technical Project Management</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-purple)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">HLD/LLD Documentation</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-purple)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Risk & Security Audits</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-purple)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">RFP/Proposal Development</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-purple)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Team Leadership</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-purple)"></div></div></div>
+      <div class="skill-item"><div class="skill-label"><span class="name">Entrepreneurship</span><span class="pct">95%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95" style="background:var(--accent-purple)"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY EU SECTION -->
+<section id="whyeu">
+  <div class="section-header reveal">
+    <div class="section-label">06 / VALUE</div>
+    <h2 class="section-title">Why EU / Schengen Companies Hire Me</h2>
+    <p class="section-subtitle">Ten competitive advantages for European engineering teams</p>
+  </div>
+  <div class="reasons-grid">
+    <div class="reason-card reveal"><div class="reason-number">01</div><h4>Unique Dual-Role Experience</h4><p>Government-scale security expertise combined with commercial engineering agility — a rare and highly valued combination in EU Industry 4.0 initiatives.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">02</div><h4>End-to-End Engineering</h4><p>From PCB design to cloud deployment — eliminates specialist handoff friction and accelerates delivery timelines by 30-40%.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">03</div><h4>Industry 4.0 Ready</h4><p>ESP32, Modbus, PLC expertise directly applicable to EU manufacturing digitalization and smart factory initiatives.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">04</div><h4>Critical Infrastructure Mindset</h4><p>NIS2-aligned security thinking from national-level agency experience — essential for EU critical infrastructure compliance.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">05</div><h4>Large-Scale Project Management</h4><p>Proven delivery of city-wide networks, aviation security audits, and petabyte storage — enterprise reliability at scale.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">06</div><h4>Security-First Architecture</h4><p>Enterprise-grade security: encryption, audit logging, rate limiting, secure authentication — built into every layer.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">07</div><h4>Cost-Effective Innovation</h4><p>70% cost reduction track record without compromising safety or compliance — maximizes engineering ROI.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">08</div><h4>Multidisciplinary Perspective</h4><p>Hardware + software + networking + security + business — holistic problem solving that reduces communication overhead.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">09</div><h4>Documentation Excellence</h4><p>Comprehensive HLD, LLD, proposals, and specifications ensuring knowledge transfer and long-term maintainability.</p></div>
+    <div class="reason-card reveal"><div class="reason-number">10</div><h4>Immediate Availability</h4><p>Fully prepared for EU Blue Card or national visa pathways — no delays, ready to contribute from day one.</p></div>
+  </div>
+</section>
+
+<!-- TERMINAL CONTACT -->
+<section id="contact">
+  <div class="section-header reveal">
+    <div class="section-label">07 / CONNECT</div>
+    <h2 class="section-title">Let's Build the Future Together</h2>
+    <p class="section-subtitle">Type commands to explore contact options. Try: help, email, phone, linkedin, github, send</p>
+  </div>
+  <div class="terminal reveal">
+    <div class="terminal-header">
+      <div class="terminal-btn red"></div>
+      <div class="terminal-btn yellow"></div>
+      <div class="terminal-btn green"></div>
+      <div class="terminal-title">tilaye@portfolio:~</div>
+    </div>
+    <div class="terminal-body" id="terminal-body">
+      <div class="terminal-line">
+        <span class="terminal-prompt">$</span>
+        <span class="terminal-output info">Welcome to the Systems Architect Terminal v3.0</span>
+      </div>
+      <div class="terminal-line">
+        <span class="terminal-prompt">$</span>
+        <span class="terminal-output">Type <span style="color:var(--primary)">help</span> to see available commands.</span>
+      </div>
+      <div class="terminal-input-line">
+        <span class="terminal-prompt">$</span>
+        <input type="text" id="terminal-input" placeholder="type a command..." autocomplete="off" spellcheck="false">
+        <span class="terminal-cursor"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Tilaye Merera Dinka · Systems Architect · Portfolio v3.0 · June 2026</p>
+  <p style="margin-top:8px;">Built with Three.js, GSAP, and raw determination.</p>
+</footer>
+
+<script>
+// ============================================
+// LOADING SCREEN
+// ============================================
+const loaderBar = document.getElementById('loader-bar');
+const loader = document.getElementById('loader');
+let loadProgress = 0;
+
+const loadInterval = setInterval(() => {
+  loadProgress += Math.random() * 15;
+  if (loadProgress >= 100) {
+    loadProgress = 100;
+    clearInterval(loadInterval);
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      initHero();
+      initScrollAnimations();
+    }, 500);
+  }
+  loaderBar.style.width = loadProgress + '%';
+}, 150);
+
+// ============================================
+// THREE.JS HERO PARTICLE NETWORK
+// ============================================
+let heroScene, heroCamera, heroRenderer, heroParticles, heroLines;
+let mouseX = 0, mouseY = 0;
+
+function initHero() {
+  const canvas = document.getElementById('hero-canvas');
+  const w = canvas.offsetWidth;
+  const h = canvas.offsetHeight;
+
+  heroScene = new THREE.Scene();
+  heroCamera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
+  heroCamera.position.z = 50;
+
+  heroRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  heroRenderer.setSize(w, h);
+  heroRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  // Create particles
+  const particleCount = 400;
+  const positions = new Float32Array(particleCount * 3);
+  const colors = new Float32Array(particleCount * 3);
+
+  for (let i = 0; i < particleCount; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 100;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 60;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+
+    const colorChoice = Math.random();
+    if (colorChoice < 0.4) {
+      colors[i * 3] = 0.96; colors[i * 3 + 1] = 0.62; colors[i * 3 + 2] = 0.04; // amber
+    } else if (colorChoice < 0.7) {
+      colors[i * 3] = 0.23; colors[i * 3 + 1] = 0.51; colors[i * 3 + 2] = 0.96; // blue
+    } else {
+      colors[i * 3] = 0.58; colors[i * 3 + 1] = 0.65; colors[i * 3 + 2] = 0.78; // slate
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const material = new THREE.PointsMaterial({
+    size: 0.5,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending
+  });
+
+  heroParticles = new THREE.Points(geometry, material);
+  heroScene.add(heroParticles);
+
+  // Mouse interaction
+  document.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  animateHero();
+}
+
+function animateHero() {
+  requestAnimationFrame(animateHero);
+
+  const positions = heroParticles.geometry.attributes.position.array;
+  const time = Date.now() * 0.001;
+
+  for (let i = 0; i < positions.length; i += 3) {
+    positions[i + 1] += Math.sin(time + positions[i] * 0.01) * 0.02;
+
+    // Mouse repulsion
+    const dx = positions[i] - mouseX * 30;
+    const dy = positions[i + 1] - mouseY * 20;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 15) {
+      positions[i] += dx * 0.01;
+      positions[i + 1] += dy * 0.01;
+    }
+  }
+
+  heroParticles.geometry.attributes.position.needsUpdate = true;
+  heroParticles.rotation.y = time * 0.05;
+
+  heroRenderer.render(heroScene, heroCamera);
+}
+
+window.addEventListener('resize', () => {
+  if (!heroCamera) return;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  heroCamera.aspect = w / h;
+  heroCamera.updateProjectionMatrix();
+  heroRenderer.setSize(w, h);
+});
+
+// ============================================
+// GSAP SCROLL ANIMATIONS
+// ============================================
+function initScrollAnimations() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Navbar scroll effect
+  ScrollTrigger.create({
+    start: 'top -100',
+    onUpdate: (self) => {
+      document.getElementById('navbar').classList.toggle('scrolled', self.direction === 1 && self.scroll() > 100);
+    }
+  });
+
+  // Reveal animations
+  const reveals = document.querySelectorAll('.reveal');
+  reveals.forEach((el, i) => {
+    gsap.fromTo(el, 
+      { opacity: 0, y: 40 },
+      {
+        opacity: 1, y: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        },
+        delay: i % 3 * 0.1
+      }
+    );
+  });
+
+  // Skill bars animation
+  const skillBars = document.querySelectorAll('.skill-bar-fill');
+  skillBars.forEach(bar => {
+    const width = bar.dataset.width;
+    gsap.to(bar, {
+      width: width + '%',
+      duration: 1.5,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: bar,
+        start: 'top 90%',
+        toggleActions: 'play none none none'
+      }
+    });
+  });
+
+  // Hero parallax
+  gsap.to('.hero-content', {
+    y: -100,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#hero',
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true
+    }
+  });
+}
+
+// ============================================
+// GAME 1: COMMISSION THE CONTROLLER
+// ============================================
+const g1Canvas = document.getElementById('controller-canvas');
+const g1Ctx = g1Canvas.getContext('2d');
+let g1Score = 0;
+let g1Connected = 0;
+const g1Total = 5;
+
+function resizeG1() {
+  const rect = g1Canvas.parentElement.getBoundingClientRect();
+  g1Canvas.width = rect.width;
+  g1Canvas.height = 500;
+}
+resizeG1();
+window.addEventListener('resize', resizeG1);
+
+const esp32 = { x: 0, y: 0, w: 140, h: 180, color: '#1E293B', border: '#F59E0B' };
+const components = [
+  { id: 'temp', name: 'Temp Sensor', x: 50, y: 50, w: 100, h: 50, color: '#EF4444', target: 'top', connected: false },
+  { id: 'vfd', name: 'VFD Modbus', x: 50, y: 130, w: 100, h: 50, color: '#3B82F6', target: 'right', connected: false },
+  { id: 'relay', name: 'Relay Board', x: 50, y: 210, w: 100, h: 50, color: '#10B981', target: 'bottom', connected: false },
+  { id: 'wifi', name: 'WiFi Module', x: 50, y: 290, w: 100, h: 50, color: '#8B5CF6', target: 'left', connected: false },
+  { id: 'watchdog', name: 'Watchdog', x: 50, y: 370, w: 100, h: 50, color: '#F59E0B', target: 'center', connected: false },
+];
+
+let dragged = null;
+let dragOffset = { x: 0, y: 0 };
+
+function drawG1() {
+  const w = g1Canvas.width;
+  const h = g1Canvas.height;
+  g1Ctx.clearRect(0, 0, w, h);
+
+  // Grid background
+  g1Ctx.strokeStyle = 'rgba(30,41,59,0.5)';
+  g1Ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 40) {
+    g1Ctx.beginPath(); g1Ctx.moveTo(x, 0); g1Ctx.lineTo(x, h); g1Ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 40) {
+    g1Ctx.beginPath(); g1Ctx.moveTo(0, y); g1Ctx.lineTo(w, y); g1Ctx.stroke();
+  }
+
+  // ESP32 Board
+  esp32.x = w / 2 - esp32.w / 2;
+  esp32.y = h / 2 - esp32.h / 2;
+
+  // Board glow
+  g1Ctx.shadowColor = esp32.border;
+  g1Ctx.shadowBlur = 20;
+  g1Ctx.fillStyle = esp32.color;
+  g1Ctx.strokeStyle = esp32.border;
+  g1Ctx.lineWidth = 2;
+  g1Ctx.beginPath();
+  g1Ctx.roundRect(esp32.x, esp32.y, esp32.w, esp32.h, 8);
+  g1Ctx.fill();
+  g1Ctx.stroke();
+  g1Ctx.shadowBlur = 0;
+
+  // ESP32 label
+  g1Ctx.fillStyle = '#F59E0B';
+  g1Ctx.font = 'bold 14px JetBrains Mono';
+  g1Ctx.textAlign = 'center';
+  g1Ctx.fillText('ESP32', esp32.x + esp32.w/2, esp32.y + 30);
+  g1Ctx.fillStyle = '#64748B';
+  g1Ctx.font = '10px JetBrains Mono';
+  g1Ctx.fillText('240MHz Dual Core', esp32.x + esp32.w/2, esp32.y + 48);
+
+  // Connection points
+  const targets = {
+    top: { x: esp32.x + esp32.w/2, y: esp32.y },
+    right: { x: esp32.x + esp32.w, y: esp32.y + esp32.h/2 },
+    bottom: { x: esp32.x + esp32.w/2, y: esp32.y + esp32.h },
+    left: { x: esp32.x, y: esp32.y + esp32.h/2 },
+    center: { x: esp32.x + esp32.w/2, y: esp32.y + esp32.h/2 + 20 },
+  };
+
+  for (const [key, pos] of Object.entries(targets)) {
+    g1Ctx.beginPath();
+    g1Ctx.arc(pos.x, pos.y, 6, 0, Math.PI * 2);
+    g1Ctx.fillStyle = key === 'center' ? '#F59E0B' : '#334155';
+    g1Ctx.fill();
+    g1Ctx.strokeStyle = key === 'center' ? '#F59E0B' : '#475569';
+    g1Ctx.lineWidth = 2;
+    g1Ctx.stroke();
+  }
+
+  // Draw components
+  components.forEach(comp => {
+    if (comp.connected) {
+      const target = targets[comp.target];
+      comp.x = target.x - comp.w/2;
+      comp.y = target.y - comp.h/2;
+      if (comp.target === 'top') comp.y -= comp.h/2 + 8;
+      if (comp.target === 'bottom') comp.y += comp.h/2 + 8;
+      if (comp.target === 'left') comp.x -= comp.w/2 + 8;
+      if (comp.target === 'right') comp.x += comp.w/2 + 8;
+      if (comp.target === 'center') comp.y += 25;
+    }
+
+    // Component glow if connected
+    if (comp.connected) {
+      g1Ctx.shadowColor = comp.color;
+      g1Ctx.shadowBlur = 15;
+    }
+
+    g1Ctx.fillStyle = comp.color + '20';
+    g1Ctx.strokeStyle = comp.color;
+    g1Ctx.lineWidth = 2;
+    g1Ctx.beginPath();
+    g1Ctx.roundRect(comp.x, comp.y, comp.w, comp.h, 6);
+    g1Ctx.fill();
+    g1Ctx.stroke();
+    g1Ctx.shadowBlur = 0;
+
+    g1Ctx.fillStyle = comp.color;
+    g1Ctx.font = 'bold 11px JetBrains Mono';
+    g1Ctx.textAlign = 'center';
+    g1Ctx.fillText(comp.name, comp.x + comp.w/2, comp.y + comp.h/2 + 4);
+  });
+
+  // Connection lines for connected components
+  components.forEach(comp => {
+    if (comp.connected) {
+      const target = targets[comp.target];
+      let startX = comp.x + comp.w/2;
+      let startY = comp.y + comp.h/2;
+
+      g1Ctx.strokeStyle = comp.color;
+      g1Ctx.lineWidth = 2;
+      g1Ctx.setLineDash([5, 3]);
+      g1Ctx.beginPath();
+      g1Ctx.moveTo(startX, startY);
+      g1Ctx.lineTo(target.x, target.y);
+      g1Ctx.stroke();
+      g1Ctx.setLineDash([]);
+    }
+  });
+
+  // Success animation
+  if (g1Connected === g1Total) {
+    g1Ctx.fillStyle = 'rgba(16,185,129,0.1)';
+    g1Ctx.fillRect(0, 0, w, h);
+    g1Ctx.fillStyle = '#10B981';
+    g1Ctx.font = 'bold 24px JetBrains Mono';
+    g1Ctx.textAlign = 'center';
+    g1Ctx.fillText('SYSTEM ONLINE', w/2, h/2 - 20);
+    g1Ctx.font = '14px JetBrains Mono';
+    g1Ctx.fillText('Controller booted successfully. All modules connected.', w/2, h/2 + 10);
+  }
+
+  requestAnimationFrame(drawG1);
+}
+
+drawG1();
+
+g1Canvas.addEventListener('mousedown', (e) => {
+  const rect = g1Canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  components.forEach(comp => {
+    if (comp.connected) return;
+    if (mx >= comp.x && mx <= comp.x + comp.w && my >= comp.y && my <= comp.y + comp.h) {
+      dragged = comp;
+      dragOffset.x = mx - comp.x;
+      dragOffset.y = my - comp.y;
+    }
+  });
+});
+
+g1Canvas.addEventListener('mousemove', (e) => {
+  if (!dragged) return;
+  const rect = g1Canvas.getBoundingClientRect();
+  dragged.x = e.clientX - rect.left - dragOffset.x;
+  dragged.y = e.clientY - rect.top - dragOffset.y;
+});
+
+g1Canvas.addEventListener('mouseup', () => {
+  if (!dragged) return;
+
+  const w = g1Canvas.width;
+  const h = g1Canvas.height;
+  esp32.x = w / 2 - esp32.w / 2;
+  esp32.y = h / 2 - esp32.h / 2;
+
+  const targets = {
+    top: { x: esp32.x + esp32.w/2, y: esp32.y, range: 40 },
+    right: { x: esp32.x + esp32.w, y: esp32.y + esp32.h/2, range: 40 },
+    bottom: { x: esp32.x + esp32.w/2, y: esp32.y + esp32.h, range: 40 },
+    left: { x: esp32.x, y: esp32.y + esp32.h/2, range: 40 },
+    center: { x: esp32.x + esp32.w/2, y: esp32.y + esp32.h/2 + 20, range: 50 },
+  };
+
+  const compCX = dragged.x + dragged.w/2;
+  const compCY = dragged.y + dragged.h/2;
+
+  for (const [key, pos] of Object.entries(targets)) {
+    const dist = Math.sqrt((compCX - pos.x)**2 + (compCY - pos.y)**2);
+    if (dist < pos.range && dragged.target === key) {
+      dragged.connected = true;
+      g1Connected++;
+      g1Score += 200;
+      document.getElementById('game1-score').textContent = g1Score;
+      document.getElementById('game1-status').textContent = g1Connected === g1Total ? 'ONLINE' : 'BOOTING...';
+      document.getElementById('game1-status').style.color = g1Connected === g1Total ? '#10B981' : '#F59E0B';
+      break;
+    }
+  }
+
+  dragged = null;
+});
+
+// ============================================
+// GAME 2: NETWORK ARCHITECT
+// ============================================
+const g2Canvas = document.getElementById('network-canvas');
+const g2Ctx = g2Canvas.getContext('2d');
+let g2Budget = 50000;
+let g2Coverage = 0;
+let g2Latency = 0;
+let g2Score = 0;
+let g2Tool = 'router';
+let g2Placed = [];
+
+function resizeG2() {
+  const rect = g2Canvas.parentElement.getBoundingClientRect();
+  g2Canvas.width = rect.width;
+  g2Canvas.height = 500;
+}
+resizeG2();
+window.addEventListener('resize', resizeG2);
+
+const deviceTypes = {
+  router: { name: 'Router', cost: 5000, range: 120, color: '#F59E0B', latency: 2 },
+  switch: { name: 'Switch', cost: 3000, range: 80, color: '#3B82F6', latency: 1 },
+  camera: { name: 'Camera', cost: 1000, range: 40, color: '#10B981', latency: 5 },
+  storage: { name: 'Storage', cost: 8000, range: 60, color: '#8B5CF6', latency: 3 },
+};
+
+// Coverage zones (areas that need to be covered)
+const zones = [];
+for (let i = 0; i < 8; i++) {
+  zones.push({
+    x: 100 + Math.random() * (g2Canvas.width - 200),
+    y: 80 + Math.random() * (g2Canvas.height - 160),
+    r: 30,
+    covered: false
+  });
+}
+
+function drawG2() {
+  const w = g2Canvas.width;
+  const h = g2Canvas.height;
+  g2Ctx.clearRect(0, 0, w, h);
+
+  // Grid
+  g2Ctx.strokeStyle = 'rgba(30,41,59,0.4)';
+  g2Ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 50) {
+    g2Ctx.beginPath(); g2Ctx.moveTo(x, 0); g2Ctx.lineTo(x, h); g2Ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 50) {
+    g2Ctx.beginPath(); g2Ctx.moveTo(0, y); g2Ctx.lineTo(w, y); g2Ctx.stroke();
+  }
+
+  // Coverage zones
+  zones.forEach(zone => {
+    zone.covered = false;
+    g2Placed.forEach(dev => {
+      const d = Math.sqrt((dev.x - zone.x)**2 + (dev.y - zone.y)**2);
+      if (d < deviceTypes[dev.type].range) zone.covered = true;
+    });
+
+    g2Ctx.beginPath();
+    g2Ctx.arc(zone.x, zone.y, zone.r, 0, Math.PI * 2);
+    g2Ctx.fillStyle = zone.covered ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.1)';
+    g2Ctx.fill();
+    g2Ctx.strokeStyle = zone.covered ? '#10B981' : '#EF4444';
+    g2Ctx.lineWidth = 1;
+    g2Ctx.setLineDash([3, 3]);
+    g2Ctx.stroke();
+    g2Ctx.setLineDash([]);
+
+    g2Ctx.fillStyle = zone.covered ? '#10B981' : '#EF4444';
+    g2Ctx.font = '10px JetBrains Mono';
+    g2Ctx.textAlign = 'center';
+    g2Ctx.fillText(zone.covered ? 'COVERED' : 'NEEDS COV', zone.x, zone.y + 4);
+  });
+
+  // Draw placed devices
+  g2Placed.forEach(dev => {
+    const type = deviceTypes[dev.type];
+
+    // Range circle
+    g2Ctx.beginPath();
+    g2Ctx.arc(dev.x, dev.y, type.range, 0, Math.PI * 2);
+    g2Ctx.fillStyle = type.color + '08';
+    g2Ctx.fill();
+    g2Ctx.strokeStyle = type.color + '30';
+    g2Ctx.lineWidth = 1;
+    g2Ctx.setLineDash([4, 4]);
+    g2Ctx.stroke();
+    g2Ctx.setLineDash([]);
+
+    // Device body
+    g2Ctx.fillStyle = type.color + '20';
+    g2Ctx.strokeStyle = type.color;
+    g2Ctx.lineWidth = 2;
+    g2Ctx.beginPath();
+    g2Ctx.arc(dev.x, dev.y, 18, 0, Math.PI * 2);
+    g2Ctx.fill();
+    g2Ctx.stroke();
+
+    g2Ctx.fillStyle = type.color;
+    g2Ctx.font = 'bold 10px JetBrains Mono';
+    g2Ctx.textAlign = 'center';
+    g2Ctx.fillText(dev.type[0].toUpperCase(), dev.x, dev.y + 4);
+  });
+
+  // Connection lines between devices
+  g2Ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+  g2Ctx.lineWidth = 1;
+  for (let i = 0; i < g2Placed.length; i++) {
+    for (let j = i + 1; j < g2Placed.length; j++) {
+      const d = Math.sqrt((g2Placed[i].x - g2Placed[j].x)**2 + (g2Placed[i].y - g2Placed[j].y)**2);
+      if (d < 200) {
+        g2Ctx.beginPath();
+        g2Ctx.moveTo(g2Placed[i].x, g2Placed[i].y);
+        g2Ctx.lineTo(g2Placed[j].x, g2Placed[j].y);
+        g2Ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(drawG2);
+}
+
+drawG2();
+
+function selectTool(tool) {
+  g2Tool = tool;
+  document.querySelectorAll('.game2-toolbar .tool-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tool === tool);
+  });
+}
+
+function resetNetwork() {
+  g2Placed = [];
+  g2Budget = 50000;
+  g2Score = 0;
+  updateG2Stats();
+}
+
+function updateG2Stats() {
+  const covered = zones.filter(z => z.covered).length;
+  g2Coverage = Math.round((covered / zones.length) * 100);
+  g2Latency = g2Placed.length > 0 ? Math.round(g2Placed.reduce((a, b) => a + deviceTypes[b.type].latency, 0) / g2Placed.length) : 0;
+
+  document.getElementById('budget').textContent = '$' + (g2Budget/1000).toFixed(0) + 'K';
+  document.getElementById('coverage').textContent = g2Coverage + '%';
+  document.getElementById('latency').textContent = g2Latency + 'ms';
+  document.getElementById('game2-score').textContent = g2Score;
+}
+
+function checkNetwork() {
+  const covered = zones.filter(z => z.covered).length;
+  if (covered === zones.length && g2Budget >= 0) {
+    g2Score = Math.round((g2Budget / 50000) * 1000 + g2Coverage * 10);
+    alert('NETWORK VALIDATED! Score: ' + g2Score + ' | Full coverage achieved with $' + (g2Budget/1000).toFixed(0) + 'K remaining.');
+  } else if (g2Budget < 0) {
+    alert('BUDGET EXCEEDED! Remove some devices and try again.');
+  } else {
+    alert('INCOMPLETE COVERAGE! ' + (zones.length - covered) + ' zones still need devices.');
+  }
+  updateG2Stats();
+}
+
+g2Canvas.addEventListener('click', (e) => {
+  const rect = g2Canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  const type = deviceTypes[g2Tool];
+  if (g2Budget >= type.cost) {
+    g2Placed.push({ x, y, type: g2Tool });
+    g2Budget -= type.cost;
+    updateG2Stats();
+  } else {
+    // Flash budget red
+    document.getElementById('budget').style.color = '#EF4444';
+    setTimeout(() => document.getElementById('budget').style.color = '', 500);
+  }
+});
+
+// ============================================
+// TERMINAL CONTACT
+// ============================================
+const terminalBody = document.getElementById('terminal-body');
+const terminalInput = document.getElementById('terminal-input');
+
+const commands = {
+  help: () => [
+    'Available commands:',
+    '  email    - Show email address',
+    '  phone    - Show phone number',
+    '  linkedin - Show LinkedIn profile',
+    '  github   - Show GitHub profile',
+    '  website  - Show website URL',
+    '  send     - Open contact form',
+    '  clear    - Clear terminal',
+    '  whoami   - About this profile',
+  ],
+  email: () => ['til_mer@yahoo.com'],
+  phone: () => ['+251 920 088 733'],
+  linkedin: () => ['linkedin.com/in/tilaye-merera-219470338'],
+  github: () => ['github.com/tilaye1'],
+  website: () => ['www.winglife.net'],
+  whoami: () => [
+    'Tilaye Merera Dinka — Systems Architect',
+    '7+ years | 1,000+ cameras | 70% cost reduction',
+    'EU Relocation Ready | Immediate Availability',
+  ],
+  send: () => {
+    setTimeout(() => {
+      addTerminalLine('Opening secure contact channel...', 'info');
+      setTimeout(() => {
+        addTerminalLine('Email: til_mer@yahoo.com', 'success');
+        addTerminalLine('Phone: +251 920 088 733', 'success');
+        addTerminalLine('LinkedIn: linkedin.com/in/tilaye-merera-219470338', 'success');
+        addTerminalLine('GitHub: github.com/tilaye1', 'success');
+        addTerminalLine('Website: www.winglife.net', 'success');
+        addTerminalLine('Ready to build the future together.', 'info');
+      }, 800);
+    }, 300);
+    return ['Initiating contact sequence...'];
+  },
+  clear: () => {
+    const lines = terminalBody.querySelectorAll('.terminal-line');
+    lines.forEach((line, i) => { if (i < lines.length - 1) line.remove(); });
+    return ['Terminal cleared.'];
+  },
+};
+
+function addTerminalLine(text, type = '') {
+  const line = document.createElement('div');
+  line.className = 'terminal-line';
+  line.innerHTML = `<span class="terminal-prompt">$</span><span class="terminal-output ${type}">${text}</span>`;
+  terminalBody.insertBefore(line, terminalBody.lastElementChild);
+  terminalBody.scrollTop = terminalBody.scrollHeight;
+}
+
+terminalInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const cmd = terminalInput.value.trim().toLowerCase();
+    if (cmd) {
+      addTerminalLine(cmd, '');
+      if (commands[cmd]) {
+        const output = commands[cmd]();
+        if (output && Array.isArray(output)) {
+          output.forEach(line => addTerminalLine(line, ''));
+        }
+      } else {
+        addTerminalLine(`Command not found: ${cmd}. Type 'help' for available commands.`, 'error');
+      }
+    }
+    terminalInput.value = '';
+  }
+});
+
+// Focus terminal on click
+terminalBody.addEventListener('click', () => terminalInput.focus());
+
+// ============================================
+// NAV SMOOTH SCROLL
+// ============================================
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+});
+</script>
+
+
+<!-- ============================================ -->
+<!-- XAI GROK AI CHATBOT v3.0 -->
+<!-- ============================================ -->
+
+<!-- Chat Toggle Button -->
+<div id="chat-toggle" onclick="toggleChat()">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+</div>
+
+<!-- Chat Window -->
+<div id="chat-window">
+  <div class="chat-header">
+    <div class="chat-header-left">
+      <div class="chat-avatar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18"/>
+          <path d="M9 21V9"/>
+        </svg>
+      </div>
+      <div>
+        <div class="chat-title">Tilaye AI Assistant</div>
+        <div class="chat-status">
+          <span class="status-dot"></span>
+          <span id="chat-status-text">Online</span>
+        </div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">&times;</button>
+  </div>
+
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-message bot">
+      <div class="chat-avatar-small">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18"/>
+          <path d="M9 21V9"/>
+        </svg>
+      </div>
+      <div class="message-content">
+        <p>Hello! I'm Tilaye's AI assistant. I know everything about his engineering work, projects, and experience.</p>
+        <p style="margin-top:8px">Ask me anything — projects, skills, EU availability, or technical details.</p>
+      </div>
+    </div>
+
+    <div class="chat-suggestions">
+      <button class="suggestion-chip" onclick="sendSuggestion('Tell me about the washing machine controller')">Washing Controller</button>
+      <button class="suggestion-chip" onclick="sendSuggestion('What is your EU availability?')">EU Availability</button>
+      <button class="suggestion-chip" onclick="sendSuggestion('What tech stack do you use?')">Tech Stack</button>
+      <button class="suggestion-chip" onclick="sendSuggestion('Tell me about your aviation security work')">Aviation Security</button>
+    </div>
+  </div>
+
+  <div class="chat-input-area">
+    <div class="chat-input-wrapper">
+      <input type="text" id="chat-input" placeholder="Ask about Tilaye's work..." autocomplete="off" spellcheck="false">
+      <button class="chat-send" onclick="sendMessage()" id="chat-send-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9"/>
+        </svg>
+      </button>
+    </div>
+    <div class="chat-footer">Powered by xAI Grok</div>
+  </div>
+</div>
+
+<!-- API Key Modal -->
+<div id="api-key-modal" style="display:none;">
+  <div class="api-key-overlay" onclick="closeApiModal(event)"></div>
+  <div class="api-key-modal">
+    <h3>Enter xAI Grok API Key</h3>
+    <p>To enable the AI assistant, please enter your xAI Grok API key. You can get one for free at <a href="https://console.x.ai" target="_blank">aistudio.google.com</a></p>
+    <input type="text" id="api-key-input" placeholder="Local mode is active — no key needed" readonly style="opacity:0.6">
+    <div class="api-key-buttons">
+      <button class="api-key-save" onclick="saveApiKey()">Got it</button>
+      
+    </div>
+    <div class="api-key-note">All responses are generated locally from Tilaye's portfolio data. Zero external API calls.</div>
+  </div>
+</div>
+
+<style>
+/* Chat Toggle Button */
+#chat-toggle {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 56px;
+  height: 56px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(245,158,11,0.4);
+  transition: all 0.3s ease;
+  color: var(--bg-deep);
+}
+#chat-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(245,158,11,0.6); }
+#chat-toggle.hidden { opacity: 0; pointer-events: none; transform: scale(0.8); }
+
+/* Chat Window */
+#chat-window {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  height: 520px;
+  max-height: calc(100vh - 140px);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  z-index: 9998;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#chat-window.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+
+.chat-header {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dim) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.chat-header-left { display: flex; align-items: center; gap: 12px; }
+.chat-avatar {
+  width: 36px; height: 36px;
+  background: rgba(11,15,25,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--bg-deep);
+}
+.chat-title { font-size: 14px; font-weight: 700; color: var(--bg-deep); font-family: 'JetBrains Mono', monospace; }
+.chat-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--bg-deep); opacity: 0.8; }
+.status-dot { width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.chat-close { background: none; border: none; color: var(--bg-deep); font-size: 24px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background 0.2s; }
+.chat-close:hover { background: rgba(11,15,25,0.15); }
+
+/* Messages */
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.chat-message { display: flex; gap: 10px; align-items: flex-start; animation: messageIn 0.3s ease; }
+@keyframes messageIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.chat-message.user { flex-direction: row-reverse; }
+.chat-message.user .message-content { background: var(--primary); color: var(--bg-deep); border-radius: 16px 16px 4px 16px; }
+.chat-avatar-small {
+  width: 28px; height: 28px;
+  background: var(--bg-card-hover);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.chat-message.user .chat-avatar-small { background: var(--primary); color: var(--bg-deep); border-color: var(--primary); }
+.message-content {
+  background: var(--bg-card-hover);
+  padding: 12px 16px;
+  border-radius: 16px 16px 16px 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: calc(100% - 50px);
+  word-wrap: break-word;
+  border: 1px solid var(--border);
+}
+.message-content p { margin: 0; }
+.message-content p + p { margin-top: 8px; }
+.message-content a { color: var(--primary); text-decoration: none; }
+.message-content a:hover { text-decoration: underline; }
+.message-content code { background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+/* Typing */
+.typing-indicator { display: flex; gap: 4px; padding: 8px 0; }
+.typing-indicator span { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-10px)} }
+
+/* Suggestions */
+.chat-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 8px; }
+.suggestion-chip { padding: 6px 14px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; font-size: 11px; color: var(--primary); cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+.suggestion-chip:hover { background: var(--primary); color: var(--bg-deep); border-color: var(--primary); }
+
+/* Input */
+.chat-input-area { padding: 12px 16px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.chat-input-wrapper { display: flex; gap: 8px; align-items: center; background: var(--bg-card-hover); border: 1px solid var(--border); border-radius: 12px; padding: 4px 4px 4px 16px; }
+#chat-input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; padding: 8px 0; }
+#chat-input::placeholder { color: var(--text-muted); }
+.chat-send { width: 36px; height: 36px; background: var(--primary); border: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--bg-deep); transition: all 0.2s; flex-shrink: 0; }
+.chat-send:hover { background: var(--primary-glow); transform: scale(1.05); }
+.chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+.chat-footer { text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
+
+/* API Key Modal */
+#api-key-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+.api-key-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+.api-key-modal {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.api-key-modal h3 { font-size: 18px; color: var(--text); margin-bottom: 12px; }
+.api-key-modal p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+.api-key-modal a { color: var(--primary); text-decoration: none; }
+.api-key-modal a:hover { text-decoration: underline; }
+#api-key-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 16px;
+  outline: none;
+}
+#api-key-input:focus { border-color: var(--primary); }
+.api-key-buttons { display: flex; gap: 10px; }
+.api-key-save { flex: 1; padding: 10px; background: var(--primary); color: var(--bg-deep); border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.api-key-save:hover { background: var(--primary-glow); }
+.api-key-skip { flex: 1; padding: 10px; background: transparent; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.api-key-skip:hover { border-color: var(--text-muted); color: var(--text); }
+.api-key-note { font-size: 11px; color: var(--text-muted); margin-top: 16px; line-height: 1.5; }
+
+/* Scrollbar */
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+
+/* Error */
+.message-error { background: rgba(239,68,68,0.1) !important; border-color: rgba(239,68,68,0.3) !important; }
+
+@media (max-width: 480px) {
+  #chat-window { right: 10px; left: 10px; width: auto; bottom: 80px; }
+  #chat-toggle { right: 20px; bottom: 20px; }
+  .api-key-modal { padding: 20px; }
+}
+</style>
+
+<script>
+// ============================================
+// LOCAL AI CHATBOT v3.0 — Zero API, Zero Cost
+// ============================================
+
+let chatOpen = false;
+let apiKey = null; // Not needed for local mode
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const win = document.getElementById('chat-window');
+  const toggle = document.getElementById('chat-toggle');
+
+  if (chatOpen) {
+    win.classList.add('open');
+    toggle.classList.add('hidden');
+    document.getElementById('chat-input').focus();
+  } else {
+    win.classList.remove('open');
+    toggle.classList.remove('hidden');
+  }
+}
+
+function closeApiModal(e) {
+  if (e.target.classList.contains('api-key-overlay')) {
+    document.getElementById('api-key-modal').style.display = 'none';
+  }
+}
+
+function saveApiKey() {
+  document.getElementById('api-key-modal').style.display = 'none';
+}
+
+function skipApiKey() {
+  document.getElementById('api-key-modal').style.display = 'none';
+}
+
+function addMessage(text, isUser = false, isError = false) {
+  const messagesDiv = document.getElementById('chat-messages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'chat-message ' + (isUser ? 'user' : 'bot');
+
+  const avatar = isUser ? 
+    '<div class="chat-avatar-small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>' :
+    '<div class="chat-avatar-small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div>';
+
+  let formattedText = text
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`(.*?)`/g, '<code>$1</code>');
+
+  messageDiv.innerHTML = avatar + '<div class="message-content' + (isError ? ' message-error' : '') + '"><p>' + formattedText + '</p></div>';
+  messagesDiv.appendChild(messageDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function showTyping() {
+  const messagesDiv = document.getElementById('chat-messages');
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'chat-message bot';
+  typingDiv.id = 'typing-indicator';
+  typingDiv.innerHTML = '<div class="chat-avatar-small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+  messagesDiv.appendChild(typingDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function hideTyping() {
+  const typing = document.getElementById('typing-indicator');
+  if (typing) typing.remove();
+}
+
+// ============================================
+// LOCAL KNOWLEDGE BASE — ZERO API
+// ============================================
+
+const KNOWLEDGE_BASE = {
+  greetings: [
+    "Hello! I'm Tilaye's AI assistant. Ask me anything about his engineering work, projects, or EU availability.",
+    "Hi there! Ready to tell you all about Tilaye's systems architecture experience. What would you like to know?",
+    "Welcome! I can answer questions about Tilaye's projects, skills, or how to get in touch."
+  ],
+
+  washing: `Tilaye designed a complete **ESP32-based replacement controller** for industrial washing machines. It automates 6-stage washing cycles with **triple-layer safety** (watchdog + hardware + predictive), black-box fault logging, WiFi remote management, and OTA firmware updates.\n\n**Results:** 70% cost reduction, same-day replacement instead of 3-6 month OEM wait, deployed at 10+ commercial sites.`,
+
+  usv: `Tilaye built an **autonomous Unmanned Surface Vehicle (USV)** for river and lake depth surveying. It navigates GPS waypoints, collects bathymetric data via sonar, and streams real-time telemetry to a ground station.\n\n**Impact:** Eliminates manual boat surveying, reduces cost by 80%, and increases coverage accuracy. Uses ESP32, GPS, sonar, and C++ for autonomous navigation.`,
+
+  modbus: `The **Modbus Ultimate Scanner v2.2** is an auto-discovery tool that detects baud rate, parity, and slave ID automatically. It fingerprints devices against 273+ known manufacturer register maps using Jaccard similarity.\n\n**Stack:** Flask, SSE, ESP32. It has a real-time dark-mode dashboard and reduces commissioning from hours to minutes.`,
+
+  aviation: `Tilaye led a comprehensive security audit for **Ethiopian Airlines** — Africa's largest airline. The audit covered **2,000+ cameras** across terminals, hangars, and cargo areas.\n\nHe assessed network security, access control, and compliance with **ICAO/IATA** international aviation standards, delivering a modernization roadmap.`,
+
+  police: `Tilaye served as Technical Manager for a **Federal Police city-wide surveillance** project in Addis Ababa.\n\n**Scale:** 1,000+ IP cameras, fiber backbone, Cisco routing/switching, centralized SOC with real-time crime monitoring, and petabyte-level storage.`,
+
+  prison: `He designed a **zero-compromise security ecosystem** for a high-security federal prison with **500+ HD cameras**, advanced IDS, biometric access control, and centralized jail management.`,
+
+  bank: `Tilaye implemented **fire detection and suppression systems** for major banking datacenters including Commercial Bank of Ethiopia, Dashen Bank, Tsehay Bank, and Siinqee Bank.\n\n**Technologies:** VESDA early warning, FM200 and Novec 1230 clean agent suppression, fully NFPA compliant.`,
+
+  website: `Tilaye built the **Wing Life corporate website** using Node.js, Express, MongoDB, and Three.js. It features 3D interactive models, a full admin panel, and enterprise-grade security (Helmet.js, rate limiting).\n\n**Lighthouse scores:** 92 Performance, 98 Accessibility, 95 Best Practices, 100 SEO.`,
+
+  household: `The **Household Worker Digital Platform** is a national-scale digital marketplace for formalizing Ethiopia's household worker sector.\n\n**Features:** National ID verification via OCR + API, digital contracts with e-signatures, emergency alert system with GPS, and comprehensive audit logging. Built with Node.js, React, and React Native.`,
+
+  storage: `Tilaye architects **petabyte-level enterprise storage** (SAN/NAS) using Dell EMC, NetApp, Huawei OceanStor, and Dahua EVS for video surveillance and enterprise applications.`,
+
+  skills: `**Industrial Automation:** PLC (Siemens, Wago, Beckhoff), HMI/SCADA (WinCC), ESP32/ESP8266, Modbus RTU/TCP, RS485, VFD Control, Embedded C/C++, PCB Design (Proteus)\n\n**Security & Infrastructure:** Enterprise CCTV, Cisco Routing/Switching, SAN/NAS, Network Security, Fire Safety (FM200, NFPA), Access Control\n\n**Software Engineering:** Node.js, Express, MongoDB, React.js, JavaScript, MERN Stack, C++, Three.js, REST APIs, JWT\n\n**Project & Systems:** Technical Project Management, HLD/LLD Documentation, Risk Assessment, RFP Development, Team Leadership`,
+
+  eu: `Tilaye is **fully prepared for EU/Schengen relocation** and available immediately. He is Blue Card eligible and ready to contribute from day one.\n\n**Why EU companies hire him:**\n1. Unique dual-role (government + commercial) experience\n2. End-to-end engineering (PCB to cloud)\n3. Industry 4.0 ready (ESP32, Modbus, PLC)\n4. Critical infrastructure mindset (NIS2-aligned)\n5. Large-scale delivery (1,000+ cameras, petabyte storage)\n6. Security-first architecture\n7. 70% cost reduction track record\n8. Multidisciplinary perspective\n9. Documentation excellence\n10. Immediate availability`,
+
+  contact: `**Email:** til_mer@yahoo.com\n**Phone:** +251 920 088 733\n**LinkedIn:** linkedin.com/in/tilaye-merera-219470338\n**GitHub:** github.com/tilaye1\n**Website:** www.winglife.net\n\nFeel free to reach out directly — he's ready to build the future together.`,
+
+  experience: `Tilaye has **8+ years** of multidisciplinary experience spanning industrial automation, enterprise IT, embedded systems, software development, and security infrastructure.\n\n**Current roles:**\n• Systems Engineer at INSA (Ethiopia's cybersecurity agency) — 2018-Present\n• Co-Founder & Technical Director at Wing Life Trading PLC — 2021-Present\n\n**Education:** B.Sc. Electrical and Computer Engineering, Addis Ababa Science and Technology University`,
+
+  philosophy: `Tilaye's engineering philosophy: *"Many advanced technologies remain inaccessible because of high acquisition costs. My approach is developing affordable alternatives without compromising functionality and reliability."*\n\n**Core principles:** Practical innovation, cost-effectiveness, reliability, scalability, security by design, documentation excellence, and continuous improvement.`,
+
+  fallback: `I can tell you about Tilaye's **projects** (USV, washing controller, Modbus scanner, aviation audit, surveillance systems), **skills** (industrial automation, MERN stack, embedded C/C++, security), **EU availability**, or **contact info**. What would you like to know?`
+};
+
+function getLocalResponse(input) {
+  const text = input.toLowerCase();
+
+  // Greetings
+  if (/^(hi|hello|hey|greetings|howdy|sup|yo|hola)/.test(text)) {
+    return pickRandom(KNOWLEDGE_BASE.greetings);
+  }
+
+  // Help
+  if (/help|commands|what can you do|what do you know/.test(text)) {
+    return `I can answer questions about:\n• **Projects** — USV, washing controller, Modbus scanner, aviation audit, surveillance, prison security, banking fire systems, website\n• **Skills** — Industrial automation, MERN stack, embedded C/C++, security, networking\n• **Experience** — INSA, Wing Life, 7+ years\n• **EU Availability** — Relocation ready, Blue Card eligible\n• **Contact** — Email, phone, LinkedIn, GitHub\n\nWhat would you like to explore?`;
+  }
+
+  // USV / unmanned surface vehicle / boat / survey / sonar / bathymetry
+  if (/usv|unmanned surface|survey boat|depth survey|bathymetry|sonar|river survey|lake survey|autonomous boat|water survey/.test(text)) {
+    return KNOWLEDGE_BASE.usv;
+  }
+
+  // Washing machine / laundry / controller / OEM
+  if (/wash|laundry|controller|oem|milnor|primus|lavamac|grandimpianti|vfd|heating|spin/.test(text)) {
+    return KNOWLEDGE_BASE.washing;
+  }
+
+  // Modbus / scanner / commissioning / industrial communication
+  if (/modbus|scanner|commission|baud|slave id|rs485|device discovery|jaccard|fingerprint/.test(text)) {
+    return KNOWLEDGE_BASE.modbus;
+  }
+
+  // Aviation / airline / Ethiopian / ICAO / IATA / 2000 cameras
+  if (/aviat|airline|ethiopian|icao|iata|airport|hangar|cargo|terminal/.test(text)) {
+    return KNOWLEDGE_BASE.aviation;
+  }
+
+  // Police / city-wide / surveillance / 1000 cameras / law enforcement
+  if (/police|city-wide|law enforcement|crime|traffic|1000|soc|video wall/.test(text)) {
+    return KNOWLEDGE_BASE.police;
+  }
+
+  // Prison / jail / correctional / 500 cameras / biometric
+  if (/prison|jail|correctional|inmate|biometric|500/.test(text)) {
+    return KNOWLEDGE_BASE.prison;
+  }
+
+  // Bank / fire / FM200 / Novec / VESDA / datacenter / suppression
+  if (/bank|fire|fm200|novec|vesda|datacenter|suppression|commercial bank|dashen|tsehay|siinqee/.test(text)) {
+    return KNOWLEDGE_BASE.bank;
+  }
+
+  // Website / Wing Life / Three.js / Lighthouse / SEO
+  if (/website|wing life|three\.js|lighthouse|seo|admin panel|blog/.test(text)) {
+    return KNOWLEDGE_BASE.website;
+  }
+
+  // Household / worker / platform / delala / digital marketplace
+  if (/household|worker|platform|delala|digital marketplace|national id|contract|agreement/.test(text)) {
+    return KNOWLEDGE_BASE.household;
+  }
+
+  // Storage / SAN / NAS / petabyte / Dell / NetApp / Huawei
+  if (/storage|san|nas|petabyte|dell|netapp|huawei|oceanstor|evs/.test(text)) {
+    return KNOWLEDGE_BASE.storage;
+  }
+
+  // Skills / tech stack / technologies / programming / languages / MERN / React / Node / C++ / embedded
+  if (/skill|tech stack|technology|programming|language|mern|react|node|express|mongo|javascript|embedded|c\+\+|arduino|esp32|plc|scada|wincc|modbus|vfd|pcb/.test(text)) {
+    return KNOWLEDGE_BASE.skills;
+  }
+
+  // EU / Schengen / relocation / visa / Blue Card / Europe / Germany / availability / hire
+  if (/eu|schengen|relocation|visa|blue card|europe|germany|france|available|hire|relocate|move|remote/.test(text)) {
+    return KNOWLEDGE_BASE.eu;
+  }
+
+  // Contact / email / phone / LinkedIn / GitHub / reach / touch / message
+  if (/contact|email|phone|linkedin|github|reach|touch|message|call|connect/.test(text)) {
+    return KNOWLEDGE_BASE.contact;
+  }
+
+  // Experience / background / career / work history / INSA / years
+  if (/experience|background|career|history|insa|wing life|7 years|education|degree|university/.test(text)) {
+    return KNOWLEDGE_BASE.experience;
+  }
+
+  // Philosophy / approach / mindset / engineering principles / cost reduction
+  if (/philosophy|approach|mindset|principle|cost reduction|affordable|innovation/.test(text)) {
+    return KNOWLEDGE_BASE.philosophy;
+  }
+
+  // Who / what / about / summary / overview / tell me about yourself / portfolio
+  if (/who|what|about|summary|overview|yourself|portfolio|profile|cv|resume/.test(text)) {
+    return `Tilaye Merera Dinka is a **Systems Architect** with 7+ years across industrial automation, enterprise security, embedded systems, and full-stack software.\n\nHe currently works at **INSA** (Ethiopia's cybersecurity agency) on national infrastructure, and co-founded **Wing Life Trading PLC** delivering commercial engineering services.\n\n**Signature projects:** USV autonomous survey vessel, ESP32 washing machine controller, 1,000+ camera city-wide surveillance, Ethiopian Airlines security audit, and banking datacenter fire systems.\n\nHe is **EU relocation ready** with immediate availability. Ask me about any specific project or skill!`;
+  }
+
+  // Setup API key (keep for compatibility but explain it's not needed)
+  if (/setup api key|api key|grok|gemini|openai/.test(text)) {
+    return `This chatbot runs entirely **locally** using Tilaye's portfolio knowledge base — no API keys, no payments, no external services needed. It answers instantly and works for every visitor.\n\nIf you want to integrate a cloud AI later, you can modify the code, but the local mode is designed to be fast, free, and reliable.`;
+  }
+
+  return KNOWLEDGE_BASE.fallback;
+}
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('chat-send-btn');
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  addMessage(text, true);
+  input.value = '';
+  sendBtn.disabled = true;
+  showTyping();
+
+  // Simulate "thinking" delay for natural feel (500-1200ms)
+  const delay = 500 + Math.random() * 700;
+
+  await new Promise(r => setTimeout(r, delay));
+
+  const response = getLocalResponse(text);
+  hideTyping();
+  addMessage(response);
+
+  sendBtn.disabled = false;
+}
+
+function sendSuggestion(text) {
+  document.getElementById('chat-input').value = text;
+  sendMessage();
+}
+
+// Event listeners
+document.getElementById('chat-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && chatOpen) toggleChat();
+});
+
+// Check for stored key on load (legacy compat)
+window.addEventListener('load', () => {
+  // Local mode is always active
+});
+
+</script>
+</body>
+</html>
